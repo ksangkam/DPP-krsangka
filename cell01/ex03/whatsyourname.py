@@ -1,5 +1,3 @@
-#!/usr/bin/env python3
-
 first_name = input("Hey, what's your first name? : ").strip()
 last_name = input("And your last name? : ").strip()
 
