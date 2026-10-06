@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 first_name = "Krittameth"
 last_name = "Sangkamanee"
 
