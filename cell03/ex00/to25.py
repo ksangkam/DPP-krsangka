@@ -1,8 +1,7 @@
 #!/usr/bin/env python3
 
-print("Enter a number less than 25")
 try :
-    num = int(input())
+    num = int(input("Enter a number less than 25\n"))
 except ValueError :
     exit()
 
