@@ -1,5 +1,4 @@
 def checkmate(board):
-    # 1. แปลง Input เป็น list ของแต่ละบรรทัด
     if isinstance(board, str):
         lines = [line for line in board.strip().split('\n') if line.strip()]
     elif isinstance(board, list):
@@ -8,65 +7,62 @@ def checkmate(board):
         print("incorrect board")
         return
 
-    # 2. ตรวจสอบความถูกต้องของตาราง (incorrect board)
-    rows = len(lines)
-    if rows == 0:
+    size = len(lines)
+    if size == 0:
         print("incorrect board")
         return
 
     for row in lines:
-        if len(row) != rows: # ขนาดแต่ละแถวต้องเท่ากับจำนวนแถว (สี่เหลี่ยมจัตุรัส NxN)
+        if len(row) != size:
             print("incorrect board")
             return
 
-    # 3. นับจำนวน King และหาตำแหน่ง
     king_r, king_c = -1, -1
     king_count = 0
-
-    for r in range(rows):
-        for c in range(rows):
+    for r in range(size):
+        for c in range(size):
             if lines[r][c] == 'K':
                 king_r, king_c = r, c
                 king_count += 1
 
-    # ตรวจสอบจำนวน King (indefinite king)
     if king_count != 1:
         print("indefinite king")
         return
 
-    # 4. เช็คการรุกจากทุกทิศทาง
-    directions = [
-        (-1, 0), (1, 0), (0, -1), (0, 1),   # ขึ้น, ลง, ซ้าย, ขวา (Rook, Queen)
-        (-1, -1), (-1, 1), (1, -1), (1, 1)  # ทแยง 4 ทิศ (Bishop, Queen, Pawn)
-    ]
+    def is_clear_path(r1, c1, r2, c2):
+        dr = (r2 > r1) - (r2 < r1)
+        dc = (c2 > c1) - (c2 < c1)
+        
+        curr_r, curr_c = r1 + dr, c1 + dc
+        while (curr_r, curr_c) != (r2, c2):
+            if lines[curr_r][curr_c] != '.':
+                return False
+            curr_r += dr
+            curr_c += dc
+        return True
 
-    for dr, dc in directions:
-        r, c = king_r + dr, king_c + dc
-        step = 1
-
-        while 0 <= r < rows and 0 <= c < rows:
+    for r in range(size):
+        for c in range(size):
             piece = lines[r][c]
+            
+            diff_r = abs(r - king_r)
+            diff_c = abs(c - king_c)
 
-            if piece != '.':
-                # แนวตั้ง / แนวนอน
-                if dr == 0 or dc == 0:
-                    if piece in ('R', 'Q'):
-                        print("Success")
-                        return
-                # แนวทแยง
-                else:
-                    if piece in ('B', 'Q'):
-                        print("Success")
-                        return
-                    # Pawn (P) เดินเฉียงลงมา 1 ช่อง
-                    if step == 1 and dr == 1 and piece == 'P':
+            if piece == 'P':
+                if r - king_r == 1 and diff_c == 1:
+                    print("Success")
+                    return
+
+            if piece in ('R', 'Q'):
+                if (r == king_r or c == king_c) and (r, c) != (king_r, king_c):
+                    if is_clear_path(r, c, king_r, king_c):
                         print("Success")
                         return
 
-                break # เจอหมากขวางทางแล้ว หยุดเช็คทิศนี้
-
-            r += dr
-            c += dc
-            step += 1
+            if piece in ('B', 'Q'):
+                if diff_r == diff_c and diff_r > 0:
+                    if is_clear_path(r, c, king_r, king_c):
+                        print("Success")
+                        return
 
     print("Fail")
