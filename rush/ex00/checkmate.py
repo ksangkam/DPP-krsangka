@@ -4,7 +4,7 @@ ROOK_DIRS = [(-1, 0), (1, 0), (0, -1), (0, 1)]
 BISHOP_DIRS = [(-1, -1), (-1, 1), (1, -1), (1, 1)]
 
 
-def parse_board(board):
+def parse_board(board):  #แปลงบอร์ดจาก str เป็น list ของ str และ check ความถูกต้องของบอร์ด
 
     if not isinstance(board, str):
         return None
