@@ -20,7 +20,7 @@ def parse_board(board):
         if len(row) != size:
             return None
 
-    # ต้องมี King ตัวเดียวเท่านั้น
+    # Check if there is exactly one king
     king_count = sum(row.count("K") for row in rows)
     if king_count != 1:
         return None
@@ -28,7 +28,7 @@ def parse_board(board):
     return rows
 
 
-def find_king(rows):
+def find_king(rows):   #find the position of the king on the board
     for r, row in enumerate(rows):
         c = row.find("K")
         if c != -1:
@@ -61,12 +61,12 @@ def is_in_check(rows):
             if 0 <= pc < size and rows[pr][pc] == "P":
                 return True
 
-    # Rook / Queen: แนวตรง
+    # Rook / Queen
     for dr, dc in ROOK_DIRS:
         if first_piece(rows, kr, kc, dr, dc) in ("R", "Q"):
             return True
 
-    # Bishop / Queen: แนวเฉียง
+    # Bishop / Queen
     for dr, dc in BISHOP_DIRS:
         if first_piece(rows, kr, kc, dr, dc) in ("B", "Q"):
             return True
