@@ -1,68 +1,86 @@
-def checkmate(board):
-    if isinstance(board, str):
-        lines = [line for line in board.strip().split('\n') if line.strip()]
-    elif isinstance(board, list):
-        lines = [line.strip() for line in board if line.strip()]
-    else:
-        print("incorrect board")
-        return
+PIECES = "KPBRQ"
 
-    size = len(lines)
+ROOK_DIRS = [(-1, 0), (1, 0), (0, -1), (0, 1)]
+BISHOP_DIRS = [(-1, -1), (-1, 1), (1, -1), (1, 1)]
+
+
+def parse_board(board):
+
+    if not isinstance(board, str):
+        return None
+
+    rows = board.splitlines()
+    size = len(rows)
+
     if size == 0:
-        print("incorrect board")
-        return
+        return None
 
-    for row in lines:
+    # Check the board it if is a square
+    for row in rows:
         if len(row) != size:
-            print("incorrect board")
-            return
+            return None
 
-    king_r, king_c = -1, -1
-    king_count = 0
-    for r in range(size):
-        for c in range(size):
-            if lines[r][c] == 'K':
-                king_r, king_c = r, c
-                king_count += 1
-
+    # ต้องมี King ตัวเดียวเท่านั้น
+    king_count = sum(row.count("K") for row in rows)
     if king_count != 1:
-        print("indefinite king")
+        return None
+
+    return rows
+
+
+def find_king(rows):
+    for r, row in enumerate(rows):
+        c = row.find("K")
+        if c != -1:
+            return r, c
+    return None
+
+
+def first_piece(rows, r, c, dr, dc):
+    """เดินจากตำแหน่ง (r, c) ไปตามทิศ (dr, dc)
+    คืนตัวหมากตัวแรกที่เจอ หรือ None ถ้าไม่เจอจนสุดกระดาน"""
+    size = len(rows)
+    r += dr
+    c += dc
+    while 0 <= r < size and 0 <= c < size:
+        if rows[r][c] in PIECES:
+            return rows[r][c]
+        r += dr
+        c += dc
+    return None
+
+
+def is_in_check(rows):
+    size = len(rows)
+    kr, kc = find_king(rows)
+
+
+    pr = kr + 1
+    if pr < size:
+        for pc in (kc - 1, kc + 1):
+            if 0 <= pc < size and rows[pr][pc] == "P":
+                return True
+
+    # Rook / Queen: แนวตรง
+    for dr, dc in ROOK_DIRS:
+        if first_piece(rows, kr, kc, dr, dc) in ("R", "Q"):
+            return True
+
+    # Bishop / Queen: แนวเฉียง
+    for dr, dc in BISHOP_DIRS:
+        if first_piece(rows, kr, kc, dr, dc) in ("B", "Q"):
+            return True
+
+    return False
+
+
+def checkmate(board):
+    rows = parse_board(board)
+    if rows is None:
+        print("Error")
         return
 
-    def is_clear_path(r1, c1, r2, c2):
-        dr = (r2 > r1) - (r2 < r1)
-        dc = (c2 > c1) - (c2 < c1)
-        
-        curr_r, curr_c = r1 + dr, c1 + dc
-        while (curr_r, curr_c) != (r2, c2):
-            if lines[curr_r][curr_c] != '.':
-                return False
-            curr_r += dr
-            curr_c += dc
-        return True
-
-    for r in range(size):
-        for c in range(size):
-            piece = lines[r][c]
-            
-            diff_r = abs(r - king_r)
-            diff_c = abs(c - king_c)
-
-            if piece == 'P':
-                if r - king_r == 1 and diff_c == 1:
-                    print("Success")
-                    return
-
-            if piece in ('R', 'Q'):
-                if (r == king_r or c == king_c) and (r, c) != (king_r, king_c):
-                    if is_clear_path(r, c, king_r, king_c):
-                        print("Success")
-                        return
-
-            if piece in ('B', 'Q'):
-                if diff_r == diff_c and diff_r > 0:
-                    if is_clear_path(r, c, king_r, king_c):
-                        print("Success")
-                        return
-
-    print("Fail")
+    if is_in_check(rows):
+        print("Success")
+    else:
+        print("Fail")
